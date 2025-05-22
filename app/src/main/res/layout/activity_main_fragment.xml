@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Пошук роботи"
+            android:textSize="24sp" />
+
+        <EditText
+            android:id="@+id/etPosition"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Посада" />
+
+        <TextView
+            android:layout_marginTop="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Країна" />
+
+        <Spinner
+            android:id="@+id/spinnerCountry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_marginTop="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Місто" />
+
+        <Spinner
+            android:id="@+id/spinnerCity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <RadioGroup
+            android:id="@+id/rgEmploymentType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <RadioButton
+                android:id="@+id/rbFullTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Повна зайнятість" />
+
+            <RadioButton
+                android:id="@+id/rbPartTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Часткова зайнятість" />
+        </RadioGroup>
+
+        <CheckBox
+            android:id="@+id/cbRemote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Віддалена робота"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:layout_marginTop="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Досвід (років):" />
+
+        <SeekBar
+            android:id="@+id/seekExperience"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="10" />
+
+        <TextView
+            android:id="@+id/tvExperienceValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 років" />
+
+        <Button
+            android:id="@+id/btnSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Пошук"
+            android:layout_marginTop="16dp" />
+    </LinearLayout>
+</ScrollView>
