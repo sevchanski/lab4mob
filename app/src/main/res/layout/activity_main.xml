@@ -13,6 +13,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Пошук роботи"
+            android:paddingTop="90dp"
             android:textSize="24sp" />
 
         <EditText
@@ -21,11 +22,25 @@
             android:layout_height="wrap_content"
             android:hint="Посада" />
 
-        <EditText
-            android:id="@+id/etLocation"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Місто" />
+            android:text="Країна" />
+
+        <Spinner
+            android:id="@+id/spinnerCountry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Місто" />
+
+        <Spinner
+            android:id="@+id/spinnerCity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
         <RadioGroup
             android:id="@+id/rgEmploymentType"
