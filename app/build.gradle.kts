@@ -62,6 +62,9 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui:1.5.10")
     implementation("androidx.activity:activity-compose")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
 
     // Життєвий цикл
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")

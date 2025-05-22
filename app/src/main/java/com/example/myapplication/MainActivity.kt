@@ -1,5 +1,7 @@
 package com.example.myapplication
 import com.example.myapplication.model.SearchData
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
