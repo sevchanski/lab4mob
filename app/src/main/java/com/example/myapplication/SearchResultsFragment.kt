@@ -1,25 +1,20 @@
-package com.example.myapplication // Пакет вашого додатка
+package com.example.myapplication
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.myapplication.databinding.ActivitySearchResultsFragmentBinding // АБО com.example.myapplication.databinding.ActivitySearchResultsFragmentBinding, якщо так називається ваш макет
-import com.example.myapplication.model.SearchData
-import com.example.myapplication.api.RetrofitClient // ІМПОРТ: Ваш глобальний RetrofitClient
-
-// ІМПОРТИ ДЛЯ KOTLIN COROUTINES
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.myapplication.api.RetrofitClient
+import com.example.myapplication.databinding.ActivitySearchResultsFragmentBinding
+import com.example.myapplication.model.SearchData
 import kotlinx.coroutines.launch
 
 class SearchResultsFragment : Fragment() {
 
-    // Примітка: Використовуйте FragmentSearchResultsBinding, якщо ваш макет fragment_search_results.xml
     private var _binding: ActivitySearchResultsFragmentBinding? = null
     private val binding get() = _binding!!
 
@@ -29,15 +24,15 @@ class SearchResultsFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            // Ключ "searchData" має співпадати з тим, що ви передаєте з MainFragment
             searchData = it.getParcelable("searchData") ?: run {
-                Toast.makeText(requireContext(), "Дані пошуку не передано", Toast.LENGTH_SHORT).show()
-                parentFragmentManager.popBackStack() // Повертаємося назад, якщо дані відсутні
+                Toast.makeText(requireContext(), "Дані пошуку не передано", Toast.LENGTH_SHORT)
+                    .show()
+                parentFragmentManager.popBackStack()
                 return
             }
         } ?: run {
             Toast.makeText(requireContext(), "Дані пошуку не передано", Toast.LENGTH_SHORT).show()
-            parentFragmentManager.popBackStack() // Повертаємося назад
+            parentFragmentManager.popBackStack()
             return
         }
     }
@@ -46,7 +41,6 @@ class SearchResultsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Примітка: Використовуйте FragmentSearchResultsBinding.inflate
         _binding = ActivitySearchResultsFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -55,9 +49,7 @@ class SearchResultsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         adapter = JobAdapter(emptyList()) { job ->
-            // Відкриваємо посилання у браузері
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(job.url))
-            startActivity(intent)
+            openJobDetailFragment(job)
         }
 
         binding.recyclerViewResults.layoutManager = LinearLayoutManager(requireContext())
@@ -67,43 +59,45 @@ class SearchResultsFragment : Fragment() {
     }
 
     private fun fetchJobs() {
-        // *** НАЙВАЖЛИВІША ЗМІНА: ВИКОРИСТАННЯ ГЛОБАЛЬНОГО RetrofitClient ***
-        // Повністю ВИДАЛІТЬ ВЕСЬ КОД, ЯКИЙ ІНІЦІАЛІЗУЄ OkHttpClient, Retrofit та FindWorkApi В ЦЬОМУ МЕТОДІ
-        // Натомість використовуйте:
         val service = RetrofitClient.api
 
-        // Формуємо пошуковий рядок
-        val keywords = mutableListOf<String>()
-        if (searchData.position.isNotEmpty()) keywords.add(searchData.position)
-        if (searchData.isRemote) keywords.add("remote")
-        if (searchData.employmentType.lowercase().contains("повна")) keywords.add("fulltime")
-        if (searchData.employmentType.lowercase().contains("часткова")) keywords.add("parttime")
-        val query = keywords.joinToString(" ")
+        val keywords = mutableListOf<String>().apply {
+            if (searchData.position.isNotBlank()) add(searchData.position.trim())
+            if (searchData.isRemote) add("remote")
+        }
+        val query = keywords.joinToString(" ").ifBlank { "developer" }
+        val location = if (searchData.country.isNotBlank()) searchData.country else null
 
-        // Локація (місто + країна)
-        val location = if (searchData.city.isNotEmpty()) "${searchData.city}, ${searchData.country}" else searchData.country
-
-        // *** ВИКОРИСТАННЯ KOTLIN COROUTINES ДЛЯ АСИНХРОННОГО ВИКЛИКУ API ***
-        viewLifecycleOwner.lifecycleScope.launch { // Запускаємо корутину в контексті життєвого циклу фрагмента
+        viewLifecycleOwner.lifecycleScope.launch {
             try {
-                // Викликаємо suspend функцію з FindWorkApi
-                val response = service.getJobs(query, location)
+                val response = service.getJobs(position = query, location = location)
                 val jobs = response.body()?.results ?: emptyList()
 
-
                 if (jobs.isEmpty()) {
-                    Toast.makeText(requireContext(), "Роботи не знайдено", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Роботи не знайдено", Toast.LENGTH_SHORT)
+                        .show()
                 }
+
                 adapter.updateJobs(jobs)
             } catch (e: Exception) {
-                // Обробка помилок мережі або інших винятків
-                Toast.makeText(requireContext(), "Помилка мережі: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
-                e.printStackTrace() // Для налагодження: вивести стек викликів у Logcat
+                Toast.makeText(
+                    requireContext(),
+                    "Помилка мережі: ${e.localizedMessage}",
+                    Toast.LENGTH_LONG
+                ).show()
+                e.printStackTrace()
             }
         }
     }
 
-    // Вкладений адаптер для RecyclerView (залишається як є, з вашого коду)
+    private fun openJobDetailFragment(job: Job) {
+        val fragment = JobDetailFragment.newInstance(job)
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
     inner class JobAdapter(
         private var jobs: List<Job>,
         private val onClick: (Job) -> Unit
@@ -113,9 +107,8 @@ class SearchResultsFragment : Fragment() {
             androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root) {
             fun bind(job: Job) {
                 binding.tvJobTitle.text = job.title
-                binding.tvCompanyName.text = job.companyName // Використовуйте companyName (якщо ви оновили Job.kt)
-                // Обрізаємо опис, якщо він занадто довгий
-                binding.tvJobDescription.text = job.description.take(200) + if (job.description.length > 200) "..." else ""
+                binding.tvCompanyName.text = job.companyName
+                binding.tvJobDescription.text = job.description?.take(200)?.plus(if (job.description.length > 200) "..." else "") ?: "Опис відсутній"
                 binding.tvJobUrl.text = job.url
                 binding.tvRemote.text = if (job.remote) "Віддалена" else "Офісна"
                 binding.root.setOnClickListener {
@@ -126,7 +119,11 @@ class SearchResultsFragment : Fragment() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JobViewHolder {
             val inflater = LayoutInflater.from(parent.context)
-            val binding = com.example.myapplication.databinding.ItemJobBinding.inflate(inflater, parent, false)
+            val binding = com.example.myapplication.databinding.ItemJobBinding.inflate(
+                inflater,
+                parent,
+                false
+            )
             return JobViewHolder(binding)
         }
 
@@ -147,17 +144,14 @@ class SearchResultsFragment : Fragment() {
         _binding = null
     }
 
-    // *** ВАЖЛИВО: ЦЕЙ БЛОК 'companion object' ПОТРІБНО ДОДАТИ ***
-    // Він створює екземпляр фрагмента і передає йому аргументи (SearchData)
     companion object {
-        // Цей ключ має співпадати з тим, що ви використовуєте для отримання даних в onCreate()
         private const val ARG_SEARCH_DATA = "searchData"
 
-        @JvmStatic // Робить метод доступним як статичний з Java (і Kotlin)
+        @JvmStatic
         fun newInstance(data: SearchData) =
             SearchResultsFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelable(ARG_SEARCH_DATA, data) // data є Parcelable, тому putParcelable
+                    putParcelable(ARG_SEARCH_DATA, data)
                 }
             }
     }

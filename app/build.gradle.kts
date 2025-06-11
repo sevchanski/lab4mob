@@ -2,7 +2,8 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose") // Compose Kotlin plugin
-    id("kotlin-parcelize")                   // Parcelize plugin
+    id("kotlin-parcelize")
+    id ("kotlin-kapt" )// Parcelize plugin
 }
 
 android {
@@ -41,6 +42,7 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        dataBinding = true
     }
 
     composeOptions {
@@ -68,6 +70,9 @@ dependencies {
 
     // Життєвий цикл
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation(libs.androidx.room.runtime)
+    kapt(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
 
     // Тестування
     testImplementation("junit:junit:4.13.2")
